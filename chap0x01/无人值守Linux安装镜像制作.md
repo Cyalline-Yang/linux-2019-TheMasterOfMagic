@@ -38,7 +38,7 @@
 	root@ubuntu:~/Desktop# ls dir1
 	root@ubuntu:~/Desktop# 
 	```
-- 来到`dir2`目录下, 接下来我们需要做两件事情:
+- 来到`dir2`目录下, 接下来我们需要做三件事情:
 	- 基于官方提供的[preseed.txt](https://help.ubuntu.com/lts/installation-guide/example-preseed.txt)构建我们自己的`.seed`文件
 	- 在`isolinux/txt.cfg`中置顶添加1个新的菜单项以应用上述`.seed`文件
 	- 打包为`.iso`镜像文件
