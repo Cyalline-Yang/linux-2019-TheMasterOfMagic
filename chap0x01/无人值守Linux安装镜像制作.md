@@ -97,7 +97,8 @@
 	root@ubuntu:~/Desktop/dir2# find . -type f -print0 | xargs -0 md5sum > md5sum.txt
 	root@ubuntu:~/Desktop/dir2#
 	```
-- 来到`dir2`的上级目录, 进行打包
+- 来到`dir2`的上级目录, 进行打包.  
+	(P.S. 这一步用到`mkisofs`命令在`Ubuntu`上, 如果没有, 则可以通过`sudo apt install genisoimage`来安装.)
 	```bash
 	root@ubuntu:~/Desktop/dir2# cd ..
 	root@ubuntu:~/Desktop# mkisofs -r -V "Custom Ubuntu Install CD" \
