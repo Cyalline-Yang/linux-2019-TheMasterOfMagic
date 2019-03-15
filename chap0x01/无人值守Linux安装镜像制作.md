@@ -47,7 +47,7 @@
 - 以官方提供的示例文件为原始文件
 	- 将现在第11行改为以下两行以跳过安装时的**选择语言**
 		```
-		d-i localechooser/supported-locales multiselect en_US.UTF-8, nl_NL.UTF-8
+		d-i localechooser/supported-locales multiselect en_US.UTF-8
 		d-i pkgsel/install-language-support boolean false
 		```
 	- 删除现在第36行与第40行的注释符号并修改最后的数字为1以减少与网络相关的操作的等待时间
