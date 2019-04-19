@@ -9,12 +9,19 @@ before_install:
     - tar --xz -xvf shellcheck-"${scversion}".linux.x86_64.tar.xz
     - sudo cp shellcheck-"${scversion}"/shellcheck /usr/bin/
     - /usr/bin/shellcheck --version
+    - sudo apt install -y imagemagick
 
 script:
-  - bash test.sh
+  - BASE=chap0x04
+  - DIR1=${BASE}/task1
+  - bash ${DIR1}/imgprcs.sh -h 2>error.log
+  - bash ${DIR1}/imgprcs.sh -i ${DIR1}/996.svg -f png -q 5 -p quality5_ 2>error.log
+  - bash ${DIR1}/imgprcs.sh -i ${DIR1}/996.svg -f png -r 500x500 -p resolution500x500_ 2>error.log
+  - bash ${DIR1}/imgprcs.sh -i ${DIR1}/996.svg -f png -w 5-red-996 -p watermark-center-red-996_ 2>error.log
+  - bash ${DIR1}/imgprcs.sh -i ${DIR1} -f jpg -p batch_ 2>error.log
 
 after_script:
-  - /usr/bin/shellcheck test.sh
+  - /usr/bin/shellcheck ${DIR1}/imgprcs.sh
 
 after_failure:
   - id
