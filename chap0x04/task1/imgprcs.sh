@@ -238,7 +238,7 @@ function main {
             FILETYPE=`echo ${FILETYPE} | tr "A-Z" "a-z"`  # 转为小写
             if [[ ${FILETYPE} = jpg || ${FILETYPE} = jpeg || ${FILETYPE} = png || ${FILETYPE} = svg ]]
             then
-                COMMAND="$0 -i ${FILENAME}"
+                COMMAND="$0 -i ${INPUT}/${FILENAME}"
                 # qrwfps
                 if [[ ${QUALITY} != "" ]]; then COMMAND="${COMMAND} -q ${QUALITY}"; fi
                 if [[ ${RESOLUTION} != "" ]]; then COMMAND="${COMMAND} -r ${RESOLUTION}"; fi
@@ -254,6 +254,8 @@ function main {
         :  # just go down
     fi
     
+    cd `dirname ${INPUT}`
+    INPUT=`basename ${INPUT}`
     COMMAND="convert ${INPUT}"
     ## Compress Quality
     if [[ "${QUALITY}" != "" ]]
