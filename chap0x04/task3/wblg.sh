@@ -47,6 +47,10 @@ function count_ip() {
     fi
 }
 function count_url() {
+    url=${url//\[/\\\[}
+    url=${url//\`/\\\`}
+    url=${url//\"/\\\"}
+    url=${url//\'/\\\'}
     ((url_to_count[${url}]+=1))
     if [[ ${response} == "403" ]]
     then
