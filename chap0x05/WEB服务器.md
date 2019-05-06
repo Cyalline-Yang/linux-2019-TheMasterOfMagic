@@ -4,6 +4,7 @@ Ubuntu 18.04.1 LTS
 # 实验步骤
 注: 以下所有`bash`指令均以`root`用户身份执行. 建议实验开始前先执行一遍`apt update`
 
+## Part 1 基本要求
 <details>
 <summary>Step 0 修改本地hosts文件</summary>
 
@@ -14,7 +15,6 @@ Ubuntu 18.04.1 LTS
     vn.sec.cuc.edu.cn
     ```
 </details>
-
 <details> 
 <summary>Step 1 下载安装VeryNginx</summary>
 
@@ -202,4 +202,41 @@ Ubuntu 18.04.1 LTS
 - 之后在`VeryNginx`管理页面中添加相应的`Matcher`, `Up Stream`与`Proxy Pass`. **不要忘记点保存!**
 - 访问`dvwa.sec.cuc.edu.cn`, 即得以下页面  
     ![](images/dvwa_setup.png)
+</details>
+<details>
+<summary>Step 6 对WordPress启用HTTPS</summary>
+
+- 使用`OpenSSL`生成自签名证书  
+    ```bash
+    openssl req -x509 -newkey rsa:4096 -nodes -subj "/C=CN/ST=Beijing/L=Beijing/O=CUC/OU=SEC/CN=wp.sec.cuc.edu.cn" -keyout key.pem -out cert.pem -days 365
+    ```
+- 得到`key.pem`与`cert.pem`. 建议将其放在`/etc/nginx/`目录下
+- 修改`VeryNginx`的配置文件, 将`server`块如下修改使其同时监听`80`端口与`443`端口且只在`443`端口开启`HTTPS`验证  
+    ```
+    server {
+        listen 80;
+        listen 443 ssl;
+        ssl_certificate      /etc/nginx/cert.pem;
+        ssl_certificate_key  /etc/nginx/key.pem;
+
+        #this line shoud be include in every server block
+        include /opt/verynginx/verynginx/nginx_conf/in_server_block.conf;
+
+        location = / {
+            root   html;
+            index  index.html index.htm;
+        }
+    }
+    ```
+    修改完毕后建议使用`verynginx -t`确认配置文件正确
+- 来到管理页面, 添加一条`Scheme Lock`. **不要忘了点保存!**  
+    ![](images/wp_schemelock.png)
+- 此时访问`wp.sec.cuc.edu.cn`时便会自动跳转至`https://wp.sec.cuc.edu.cn`了
+> Q&A:
+> - Qustion: 为什么我这个时候访问到的页面是这个鸟样?  
+    ![](images/wp_whatthefuck.png)
+> - Answer: 在开发者工具中可以看到对各种资源文件的请求由于协议不对而被禁止访问. 这是WordPress本身硬编码文件URL造成的.   
+    ![](images/wp_thatsthefuck.png)  
+    我暂时想不到什么优雅的解决方式, 比起完成安装进入管理页修改硬编码逻辑, 我宁可对WordPress站点本身也启用HTTPS. 仿照上述对VeryNginx配置文件的修改过程, 类似修改WordPress站点文件后重启Nginx, 同时将`Proxy Pass`中的`http`改为`https`即可(**不要忘了点保存!**, 强迫症可以考虑把两边的8080都改为8443)  
+    ![](images/wp_fixedthefuck.png)
 </details>
