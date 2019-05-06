@@ -2,18 +2,22 @@
 Ubuntu 18.04.1 LTS
 
 # 实验步骤
-注: 以下所有`bash`指令均以`root`用户身份执行
+注: 以下所有`bash`指令均以`root`用户身份执行. 建议实验开始前先执行一遍`apt update`
 
-## Step 0 修改本地hosts文件
+<details>
+<summary>Step 0 修改本地hosts文件</summary>
+
 - 首先先修改本地hosts文件, 将以下3个域名解析为`Ubuntu`的IP地址
     ```
     wp.sec.cuc.edu.cn
     dvwa.sec.cuc.edu.cn
     vn.sec.cuc.edu.cn
     ```
-- 在`Ubuntu`中执行`apt update`
+</details>
 
-## Step 1 下载安装VeryNginx
+<details> 
+<summary>Step 1 下载安装VeryNginx</summary>
+
 - 仓库地址为`https://github.com/alexazhou/VeryNginx`, 其中有[中文文档](https://github.com/alexazhou/VeryNginx/blob/master/readme_zh.md), 内含详细的下载及安装步骤以及[Trouble Shooting](https://github.com/alexazhou/VeryNginx/wiki/Trouble-Shooting). 参照其进行下载安装即可
     ```bash
     cd ~
@@ -38,8 +42,10 @@ Ubuntu 18.04.1 LTS
     ![](images/verynginx_welcome.png)
     ![](images/verynginx_index.png)
 - 以`verynginx verynginx`登录即可进入管理页
+</details>
+<details>
+<summary>Step 2 下载安装Nginx</summary>
 
-## Step 2 下载安装Nginx
 - 在下载前先执行`verynginx -s stop`以停止`VeryNginx`, 避免与稍后自启动的`nginx`产生冲突
     > 本来这里想通过`systemctl disable nginx`来禁止即将安装的`nginx`自启, 但貌似安装之前不能这么执行(会报错), 只能先停止`verynginx`了
 - 下载安装`Nginx`只需一行即可  
@@ -48,8 +54,10 @@ Ubuntu 18.04.1 LTS
     ```
 - 此时访问`localhost`应当出现与之前一样的欢迎页
 - 执行`nginx -s stop`以停止`Nginx`
-
-## Step 3 下载安装配置WordPress
+</details>
+<details>
+<summary>Step 3 下载安装配置WordPress</summary>
+ 
 - 首先安装`WordPress`所需要的`mysql`与`php-fpm`  
     ```bash
     # 预先设置mysql-server的根用户密码
@@ -95,8 +103,10 @@ Ubuntu 18.04.1 LTS
     echo "define('FS_METHOD', 'direct');" >> wp-config.php
     ```
     (最后这行是文件操作相关的一个参数, 详见[链接](https://wordpress.stackexchange.com/questions/189554/what-security-concerns-should-i-have-when-setting-fs-method-to-direct-in-wp-co/232291))
+</details>
+<details>
+<summary>Step 4 连接VeryNginx-Nginx-WordPress</summary>
 
-## Step 4 连接`VeryNginx-Nginx-WordPress`
 - 连接`Nginx`与`WordPress`:
     ```bash
     # 在/etc/nginx/sites-available/目录下新建一个配置文件作为一个可用站点并写入相关内容(tee的作用类似于echo >>)
@@ -141,3 +151,55 @@ Ubuntu 18.04.1 LTS
         ![](images/dont_forget_save.png)
 - 访问`wp.sec.cuc.edu.cn`, 如果能出现以下界面说明当前阶段配置正确
     ![](images/wp_install.png)
+</details>
+<details>
+<summary>Step 5 DVWA</summary>
+
+- 仿照上述步骤类似安装配置即可  
+    ```bash
+    # 选择一个位置作为网站根目录
+    DVWA_PATH=/var/www/dvwa
+    mkdir -p ${DVWA_PATH}/public/
+    chown -R www-data:www-data ${DVWA_PATH}/public
+
+    # 下载解压
+    cd /tmp
+    wget https://github.com/ethicalhack3r/DVWA/archive/master.zip
+    unzip master.zip
+    cp -r DVWA-master/* ${DVWA_PATH}/public/
+    cd ${DVWA_PATH}/public/
+    cp config/config.inc.php{.dist,}
+    
+    # 创建相应的站点文件
+    DVWA_DOMAIN=dvwa.sec.cuc.edu.cn
+    DVWA_PORT=8000
+    tee /etc/nginx/sites-available/${DVWA_DOMAIN} << EOF
+    server {
+        listen localhost:${DVWA_PORT};
+        server_name ${DVWA_DOMAIN};
+
+        root ${DVWA_PATH}/public;
+        index index.php;
+
+        location / {
+            try_files \$uri \$uri/ /index.php?\$args;
+        }
+
+        location ~ \.php\$ {
+            include snippets/fastcgi-php.conf;
+            fastcgi_pass unix:/run/php/php7.2-fpm.sock;
+        }
+    }
+    EOF
+    
+    # 在sites-enabled目录下创建软链接
+    ln -s /etc/nginx/sites-available/${DVWA_DOMAIN} /etc/nginx/sites-enabled/
+    
+    # 检查配置文件正确与否并重启Nginx
+    nginx -t
+    nginx -s reload
+    ```
+- 之后在`VeryNginx`管理页面中添加相应的`Matcher`, `Up Stream`与`Proxy Pass`. **不要忘记点保存!**
+- 访问`dvwa.sec.cuc.edu.cn`, 即得以下页面  
+    ![](images/dvwa_setup.png)
+</details>
