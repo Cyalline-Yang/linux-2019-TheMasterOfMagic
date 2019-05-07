@@ -242,7 +242,6 @@ Ubuntu 18.04.1 LTS
 </details>
 
 ## Part 2 安全加固要求
-
 - 使用IP地址方式均无法访问上述任意站点，并向访客展示自定义的友好错误提示信息页面-1
     - 添加`Matcher`以匹配使用IP访问的方式  
         ![](images/ip_matcher.png)
@@ -275,3 +274,25 @@ Ubuntu 18.04.1 LTS
         ![](images/ue_result.png)
 - 通过配置VeryNginx的Filter规则实现对Damn Vulnerable Web Application (DVWA)的SQL注入实验在低安全等级条件下进行防护
     - 只是为了完成题目要求的话, 添加`Matcher`匹配一些常用注入关键词, 对应block掉即可
+
+## Part 3 VERYNGINX配置要求
+- VeryNginx的Web管理页面仅允许白名单上的访客来源IP，其他来源的IP访问均向访客展示自定义的友好错误提示信息页面-3
+    - 上文类似处理即可
+    - Matcher  
+        ![](images/notadmin_matcher.png)
+    - Response
+        ![](images/notadmin_response.png)
+    - Filter
+        ![](images/notadmin_filter.png)
+    - Result
+        ![](images/notadmin_result.png)
+- 通过定制VeryNginx的访问控制策略规则实现：
+    - 限制DVWA站点的单IP访问速率为每秒请求数 < 50, 限制Wordpress站点的单IP访问速率为每秒请求数 < 20, 超过访问频率限制的请求直接返回自定义错误提示信息页面-4
+        - Frequency Limit  
+            ![](images/limit_frequency_limit.png)
+        - Response(强行428)  
+            ![](images/limit_response.png)
+        - Result
+            ![](images/limit_wp_result.png) 
+    - 禁止curl访问
+        - 这条原理主要是通过判断请求头中`UserAgent`字段是否为`curl`来实现的. 匹配上后Block即可. 我想说的是`curl`是可以设置`UserAgent`字段的值的, 所以这条防护算是防君子不防小人吧
