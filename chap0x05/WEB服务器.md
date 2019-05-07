@@ -240,3 +240,38 @@ Ubuntu 18.04.1 LTS
     我暂时想不到什么优雅的解决方式, 比起完成安装进入管理页修改硬编码逻辑, 我宁可对WordPress站点本身也启用HTTPS. 仿照上述对VeryNginx配置文件的修改过程, 类似修改WordPress站点文件后重启Nginx, 同时将`Proxy Pass`中的`http`改为`https`即可(**不要忘了点保存!**, 强迫症可以考虑把两边的8080都改为8443)  
     ![](images/wp_fixedthefuck.png)
 </details>
+
+## Part 2 安全加固要求
+
+- 使用IP地址方式均无法访问上述任意站点，并向访客展示自定义的友好错误提示信息页面-1
+    - 添加`Matcher`以匹配使用IP访问的方式  
+        ![](images/ip_matcher.png)
+    - 添加`Response`以给出自定义的友好错误提示信息页面  
+        ![](images/ip_response.png)
+    - 根据上述`Matcher`与`Response`添加`Filter`
+        ![](images/ip_filter.png)
+    - 此时使用`ip`地址访问会出现以下页面, 可知上述`Filter`已生效
+        ![](images/ip_result.gif)
+- Damn Vulnerable Web Application (DVWA)只允许白名单上的访客来源IP，其他来源的IP访问均向访客展示自定义的友好错误提示信息页面-2
+    - 暂时未发现如何批量设置白名单IP, 一个不太灵性的解决方法是对每个白名单IP添加一条`Matcher`.
+    - Matcher  
+        ![](images/white_dvwa_matcher.png)
+    - Response  
+        ![](images/white_dvwa_response.png)
+    - Filter  
+        ![](images/white_dvwa_filter.png)
+    - 当访客IP在白名单上时  
+        ![](images/white_dvwa_accept.png)
+    - 当访客IP不在白名单上时  
+        ![](images/white_dvwa_block.png)
+- 在不升级Wordpress版本的情况下，通过定制VeryNginx的访问控制策略规则，热修复WordPress < 4.7.1 - Username Enumeration
+    - 这个漏洞的利用`payload`包含了关键字`/wp-json/wp/v2/users/`, 添加一条`Matcher`在`URL`中匹配`^/wp-json/wp/v2/users.*`Block掉即可
+    - Matcher  
+        ![](images/ue_matcher.png)
+    - No Custom Response, just 404 it
+    - Filter
+        ![](images/ue_filter.png)
+    - Result
+        ![](images/ue_result.png)
+- 通过配置VeryNginx的Filter规则实现对Damn Vulnerable Web Application (DVWA)的SQL注入实验在低安全等级条件下进行防护
+    - 只是为了完成题目要求的话, 添加`Matcher`匹配一些常用注入关键词, 对应block掉即可
