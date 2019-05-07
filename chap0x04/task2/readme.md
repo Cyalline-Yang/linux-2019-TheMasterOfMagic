@@ -11,17 +11,4 @@
 - 任务本身并不难, 只需逐行读取目标文件, 在条件符合时将相应的变量`+=1`即可
 
 # 统计结果
-```
-总共有736位球员. 其中:
-  20岁以下的球员有9位, 占比1.22%
-  20~30岁以下的球员有600位, 占比81.52%
-  30岁以上的球员有127位, 占比17.25%
-  defender有237位, 占比32.20%
-  forward有135位, 占比18.34%
-  goalie有96位, 占比13.04%
-  midfielder有268位, 占比36.41%
-  名字最短的球员是Jô, 其名字长度为2
-  名字最长的球员是Francisco_Javier_Rodriguez, 其名字长度为26
-  最年轻的球员是Fabrice_Olinga, 年龄18
-  最年长的球员是Faryd_Mondragon, 年龄42
-```
+- 见[travis](https://travis-ci.org/CUCCS/linux-2019-TheMasterOfMagic/builds/529588975#L549)

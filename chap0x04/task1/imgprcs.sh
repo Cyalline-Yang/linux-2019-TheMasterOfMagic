@@ -5,8 +5,6 @@ TOOL_NAME=imgprcs
 ## Return Codes
 RC_OK=0
 RC_ILLEGAL_OPTION=1
-RC_EMPTY_PATH=2
-RC_CONVERT_ERROR=3
 
 # Variables
 INPUT=""
@@ -32,32 +30,32 @@ function show_help() {
         echo -e "\033[4m$1\033[0m"
     }
     echo "Usage:"
-    echo "  `strong ${TOOL_NAME}` [options] "
+    echo "  $(strong "${TOOL_NAME}") [options] "
     echo "Options:"
-    echo "  `strong -h`, `strong --help`"
+    echo "  $(strong -h), $(strong --help)"
     echo "      show this help info"
-    echo "  `strong -i` `underline path`, `strong --input` `underline path`"
+    echo "  $(strong -i) $(underline path), $(strong --input) $(underline path)"
     echo "      path to input file or the directory that contains all the input files"
-    echo "  `strong -q` `underline quality`, `strong --quality`=`underline quality`"
-    echo "      compress quality of input file(s) to `underline quality`"
-    echo "  `strong -r` `underline width`x`underline height`, `strong --resize`=`underline width`x`underline height`"
-    echo "      resize input file(s) to `underline width`x`underline height`"
-    echo "  `strong -w` `underline pos`-`underline fill`-`underline text`, `strong --watermark`=`underline pos`-`underline fill`-`underline text`"
+    echo "  $(strong -q) $(underline quality), $(strong --quality)=$(underline quality)"
+    echo "      compress quality of input file(s) to $(underline quality)"
+    echo "  $(strong -r) $(underline width)x$(underline height), $(strong --resize)=$(underline width)x$(underline height)"
+    echo "      resize input file(s) to $(underline width)x$(underline height)"
+    echo "  $(strong -w) $(underline pos)-$(underline fill)-$(underline text), $(strong --watermark)=$(underline pos)-$(underline fill)-$(underline text)"
     echo "      add watermark on input file(s)"
-    echo "      avaliable `underline pos` value:"
+    echo "      avaliable $(underline pos) value:"
     echo "          1 2 3 --- ↖ ↑ ↗"
     echo "          4 5 6 --- ← · →"
     echo "          7 8 9 --- ↙ ↓ ↘"
-    echo "  `strong -f` `underline format`, `strong --format`=`underline format`"
+    echo "  $(strong -f) $(underline format), $(strong --format)=$(underline format)"
     echo "      specify the format of output file(s)"
-    echo "  `strong -p` `underline prefix`, `strong --prefix`=`underline prefix`"
-    echo "  `strong -s` `underline suffix`, `strong --suffix`=`underline suffix`"
+    echo "  $(strong -p) $(underline prefix), $(strong --prefix)=$(underline prefix)"
+    echo "  $(strong -s) $(underline suffix), $(strong --suffix)=$(underline suffix)"
     echo "      add prefix and/or suffix on the filename of output file(s)"
 }
 ## About parse options
 function parse_input() {
     INPUT=$1
-    if [ -d $1 ] || [ -f $1 ]
+    if [ -d "$1" ] || [ -f "$1" ]
     then
         INPUT=$1
     else
@@ -67,31 +65,32 @@ function parse_input() {
 function parse_quality() {
     if [[ $1 = "" ]]
     then
-        error "empty `underline quality`"
+        error "empty $(underline quality)"
     fi
     if [[ $1 =~ ^[0-9]+(\.[0-9]+)?$ ]]
     then
         QUALITY=$1
     else
-        error "invalid `underline quality`: \"$1\""
+        error "invalid $(underline quality): \"$1\""
     fi
 }
 function parse_resolution() {
     if [[ $1 = "" ]]
     then
-        error "empty `underline resolution`"
+        error "empty $(underline resolution)"
     fi
     if [[ $1 =~ ^[0-9]+x[0-9]+$ ]]
     then
         RESOLUTION=$1
     else
-        error "invalid `underline resolution`: \"$1\""
+        error "invalid $(underline resolution): \"$1\""
     fi
 }
 function parse_watermark() {
-    WATERMARK=(${1//-/ })
-    POS=${WATERMARK[0]}
-    if [ 1 -le ${POS} ] && [ ${POS} -le 9 ]
+    WATERMARK=${1//-/ }
+    read -ra WATERMARK_ARR < <(echo "${WATERMARK}")
+    POS="${WATERMARK_ARR[0]}"
+    if [ 1 -le "${POS}" ] && [ "${POS}" -le 9 ]
     then
         :  # do nothing
     else
@@ -99,8 +98,8 @@ function parse_watermark() {
     fi
 }
 function parse_format() {
-    FORMAT=`echo $1 | tr "A-Z" "a-z"`  # 转为小写
-    if [[ ${FORMAT} != "jpg" ]] && [[ ${FORMAT} != "png" ]]
+    FORMAT=$(echo "$1" | tr "[:upper:]" "[:lower:]")  # 转为小写
+    if [[ "${FORMAT}" != "jpg" ]] && [[ "${FORMAT}" != "png" ]]
     then
         error "invalid format: \"${FORMAT}\" (only \"jpg\" and \"png\" are supported)"
     fi
@@ -123,17 +122,17 @@ function parse_suffix() {
 }
 function parse_short_option() {
     rc=2
-    PARAM=${1:1}  # 截取从下标1开始的部分
-    VALUE=${2:-}
-    case ${PARAM} in
+    PARAM="${1:1}"  # 截取从下标1开始的部分
+    VALUE="${2:-}"
+    case "${PARAM}" in
         h)  FLAG_HELP=1; rc=1 ;;
-        i)  parse_input ${VALUE} ;;
-        q)  parse_quality ${VALUE} ;;
-        r)  parse_resolution ${VALUE} ;;
-        w)  parse_watermark ${VALUE} ;;
-        f)  parse_format ${VALUE} ;;
-        p)  parse_prefix ${VALUE} ;;
-        s)  parse_suffix ${VALUE} ;;
+        i)  parse_input "${VALUE}" ;;
+        q)  parse_quality "${VALUE}" ;;
+        r)  parse_resolution "${VALUE}" ;;
+        w)  parse_watermark "${VALUE}" ;;
+        f)  parse_format "${VALUE}" ;;
+        p)  parse_prefix "${VALUE}" ;;
+        s)  parse_suffix "${VALUE}" ;;
         *)  if [ "${PARAM}" = "" ]
             then
                 error "empty short param"
@@ -141,30 +140,30 @@ function parse_short_option() {
                 error "illegal option: \"${PARAM}\""
             fi
     esac
-    return ${rc}
+    return "${rc}"
 }
 function parse_long_option() {
-    PARAM=${1:2}  # 截取从下标2开始的部分
+    PARAM="${1:2}"  # 截取从下标2开始的部分
     VALUE=""
     # 如果包含等号则需要进行分割
-    if [[ ${PARAM} =~ (.*)=(.*) ]]
+    if [[ "${PARAM}" =~ (.*)=(.*) ]]
     then
-        PARAM=(${PARAM//=/ })  # 将等号替换为空格并形成数组
-        VALUE=${PARAM[1]}
-        PARAM=${PARAM[0]}
+        PARAM_VALUE=("${PARAM//=/ }")  # 将等号替换为空格并形成数组
+        PARAM="${PARAM_VALUE[0]}"
+        VALUE="${PARAM_VALUE[1]}"
         rc=2
     else
         rc=1
     fi
-    case ${PARAM} in
+    case "${PARAM}" in
         help)       FLAG_HELP=1 ;;
-        input)      parse_input ${VALUE} ;;
-        quality)    parse_quality ${VALUE} ;;
-        resolution) parse_resolution ${VALUE} ;;
-        watermark)  parse_watermark ${VALUE} ;;
-        format)     parse_format ${VALUE} ;;
-        prefix)     parse_prefix ${VALUE} ;;
-        suffix)     parse_suffix ${VALUE} ;;
+        input)      parse_input "${VALUE}" ;;
+        quality)    parse_quality "${VALUE}" ;;
+        resolution) parse_resolution "${VALUE}" ;;
+        watermark)  parse_watermark "${VALUE}" ;;
+        format)     parse_format "${VALUE}" ;;
+        prefix)     parse_prefix "${VALUE}" ;;
+        suffix)     parse_suffix "${VALUE}" ;;
         *)  if [ "${PARAM}" = "" ]
             then
                 error "empty long param"
@@ -172,7 +171,7 @@ function parse_long_option() {
                 error "illegal option: \"${PARAM}\""
             fi
     esac
-    return ${rc}
+    return "${rc}"
 }
 ## About errors and warnings
 function error() {
@@ -190,24 +189,24 @@ function main {
     while [ "${1:-}" != "" ]; do
         if [[ $1 =~ --(.*) ]]
         then
-            parse_long_option $@
+            parse_long_option "$@"
             shift $?
         elif [[ $1 =~ -(.*) ]]
         then
-            parse_short_option $@
+            parse_short_option "$@"
             shift $?
         else
             error "illegal option -- ${1}"
             shift
         fi
     done
-    if [[ "${INPUT}" = "" && ${FLAG_HELP} = 0 ]]
+    if [[ "${INPUT}" = "" && "${FLAG_HELP}" = 0 ]]
     then
         error "empty input path"
     fi
-    if [[ "${FORMAT}" == "" && ${INPUT##*.} != "" ]]
+    if [[ "${FORMAT}" == "" && "${INPUT##*.}" != "" ]]
     then
-        parse_format ${INPUT##*.}
+        parse_format "${INPUT##*.}"
     fi
     if [[ "${FORMAT}" != "" && "${FORMAT}" == "${INPUT##*.}" ]]
     then
@@ -217,45 +216,45 @@ function main {
     
     # Act
     ## if we just need to show help info
-    if [[ ${FLAG_HELP} = 1 ]]
+    if [[ "${FLAG_HELP}" = 1 ]]
     then
         show_help
-        exit ${RC_OK}
+        exit "${RC_OK}"
     fi
     ## else if there's something wrong with the arguments
-    if [[ ${FLAG_ERROR} = 1 ]]
+    if [[ "${FLAG_ERROR}" = 1 ]]
     then
         echo
         >&2 show_help
-        exit ${RC_ILLEGAL_OPTION}
+        exit "${RC_ILLEGAL_OPTION}"
     fi
     ## else we can do our jobs
-    if [ -d ${INPUT} ]
+    if [ -d "${INPUT}" ]
     then
-        for FILENAME in `ls ${INPUT}`
+        for FILENAME in "${INPUT}"/*
         do
-            FILETYPE=${FILENAME##*.}
-            FILETYPE=`echo ${FILETYPE} | tr "A-Z" "a-z"`  # 转为小写
-            if [[ ${FILETYPE} = jpg || ${FILETYPE} = jpeg || ${FILETYPE} = png || ${FILETYPE} = svg ]]
+            FILETYPE="${FILENAME##*.}"
+            FILETYPE=$(echo "${FILETYPE}" | tr "[:upper:]" "[:lower:]")  # 转为小写
+            if [[ "${FILETYPE}" = jpg || "${FILETYPE}" = jpeg || "${FILETYPE}" = png || "${FILETYPE}" = svg ]]
             then
-                COMMAND="$0 -i ${INPUT}/${FILENAME}"
+                COMMAND="$0 -i ${FILENAME}"
                 # qrwfps
-                if [[ ${QUALITY} != "" ]]; then COMMAND="${COMMAND} -q ${QUALITY}"; fi
-                if [[ ${RESOLUTION} != "" ]]; then COMMAND="${COMMAND} -r ${RESOLUTION}"; fi
-                if [[ ${WATERMARK} != "" ]]; then COMMAND="${COMMAND} -w ${WATERMARK}"; fi
-                if [[ ${FORMAT} != "" ]]; then COMMAND="${COMMAND} -f ${FORMAT}"; fi
-                if [[ ${PREFIX} != "" ]]; then COMMAND="${COMMAND} -p ${PREFIX}"; fi
-                if [[ ${SUFFIX} != "" ]]; then COMMAND="${COMMAND} -s ${SUFFIX}"; fi
-                `${COMMAND}`
+                if [[ "${QUALITY}" != "" ]]; then COMMAND="${COMMAND} -q ${QUALITY}"; fi
+                if [[ "${RESOLUTION}" != "" ]]; then COMMAND="${COMMAND} -r ${RESOLUTION}"; fi
+                if [[ "${WATERMARK}" != "" ]]; then COMMAND="${COMMAND} -w ${WATERMARK}"; fi
+                if [[ "${FORMAT}" != "" ]]; then COMMAND="${COMMAND} -f ${FORMAT}"; fi
+                if [[ "${PREFIX}" != "" ]]; then COMMAND="${COMMAND} -p ${PREFIX}"; fi
+                if [[ "${SUFFIX}" != "" ]]; then COMMAND="${COMMAND} -s ${SUFFIX}"; fi
+                ${COMMAND}
             fi
         done
-        exit ${RC_OK}
+        exit "${RC_OK}"
     else
         :  # just go down
     fi
     
-    cd `dirname ${INPUT}`
-    INPUT=`basename ${INPUT}`
+    cd "$(dirname "${INPUT}")" || return 1
+    INPUT=$(basename "${INPUT}")
     COMMAND="convert ${INPUT}"
     ## Compress Quality
     if [[ "${QUALITY}" != "" ]]
@@ -276,29 +275,29 @@ function main {
         southwest south southeast \
         )
         COMMAND="${COMMAND} \
-        -gravity ${GRAVITIES[${WATERMARK[0]}]} \
-        -fill ${WATERMARK[1]} \
+        -gravity ${GRAVITIES[${WATERMARK_ARR[0]}]} \
+        -fill ${WATERMARK_ARR[1]} \
         -pointsize 32 \
-        -annotate 0 ${WATERMARK[2]}"
+        -annotate 0 ${WATERMARK_ARR[2]}"
     fi
     ## Convert Format
-    OUTPUT=${INPUT%.*}.${FORMAT}
+    OUTPUT="${INPUT%.*}"."${FORMAT}"
     COMMAND="${COMMAND} ${OUTPUT}"
-    `${COMMAND}`
+    ${COMMAND}
 
-    COMMAND="mv ${OUTPUT} "
+    COMMAND="mv ${OUTPUT}"
     ## Add prefix and suffix
     if [[ "${PREFIX}" != "" ]]
     then
-        OUTPUT=${PREFIX}${OUTPUT}
+        OUTPUT="${PREFIX}${OUTPUT}"
     fi
     if [[ "${SUFFIX}" != "" ]]
     then
-        OUTPUT=${OUTPUT}${SUFFIX}
+        OUTPUT="${OUTPUT}${SUFFIX}"
     fi
     COMMAND="${COMMAND} ${OUTPUT}"
-    `${COMMAND}`
+    ${COMMAND}
 }
 
 # Entry point
-main $@
+main "$@"

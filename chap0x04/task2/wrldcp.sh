@@ -3,9 +3,6 @@
 set -u
 set -e
 
-# Constants
-FILENAME=worldcupplayerinfo.tsv
-
 # Variables
 ## about age
 young_man=0  # age < 20
@@ -28,26 +25,19 @@ shortest_name=""
 
 function read_variables() {
     line=${line// /_}
-    line=(${line})
-    group="${line[0]}"
-    country="${line[1]}"
-    rank="${line[2]}"
-    jersey="${line[3]}"
+    read -ra line < <(echo "${line}")
     position="${line[4]}"
     age="${line[5]}"
-    selections="${line[6]}"
-    club="${line[7]}"
     player_name="${line[8]}"
-    captain="${line[9]}"
 }
 function count_age() {
     ((age+=0))
-    if ((${age} > 0))
+    if ((age > 0))
     then
-        if ((${age} < 20))
+        if ((age < 20))
         then
             ((young_man+=1))
-        elif ((${age} > 30))
+        elif ((age > 30))
         then
             ((old_man+=1))
         else
@@ -89,7 +79,7 @@ function compare_age() {
     fi
 }
 function div() {
-    echo $(echo "scale=2; $1*100/$2" | bc)
+    echo "scale=2; $1*100/$2" | bc
 }
 function show_statistics() {
     total=$((young_man + hard_man + old_man))
@@ -107,14 +97,14 @@ function show_statistics() {
     echo "  最年长的球员是${oldest_man}, 年龄${max_age}"
 }
 function main() {
-    while read line
+    while read -r line
     do
         read_variables
         count_age
         count_position
         compare_name
         compare_age
-    done < ${FILENAME}
+    done < "$1"
     show_statistics
 }
 
