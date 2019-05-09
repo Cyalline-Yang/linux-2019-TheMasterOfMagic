@@ -11,7 +11,7 @@ function main_without_url() {
     
     # 输出top100ip
     echo "Top 100 ip:"
-    awk '{sum[$1]+=1} END {for(i in sum) {print "\t",sum[i],i}}' "$1" | grep -E "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]" |  sort -n -r -k 1 | head -n 100
+    awk '{sum[$1]+=1} END {for(i in sum) {print "\t",sum[i],i}}' "$1" | grep -E "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}" |  sort -n -r -k 1 | head -n 100
     echo
     
     # 输出top100url
