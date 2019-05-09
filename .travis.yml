@@ -1,27 +1,65 @@
 sudo: required
-
 language: sh
-
+branches:
+  except:
+    - chap0x04-result
 before_install:
-    - sudo apt-get update -q
-    - export scversion="stable" # or "v0.4.7", or "latest"
-    - wget "https://storage.googleapis.com/shellcheck/shellcheck-${scversion}.linux.x86_64.tar.xz"
-    - tar --xz -xvf shellcheck-"${scversion}".linux.x86_64.tar.xz
-    - sudo cp shellcheck-"${scversion}"/shellcheck /usr/bin/
-    - /usr/bin/shellcheck --version
-
+  # 配置ssh
+  - openssl aes-256-cbc -K $encrypted_b803659a525b_key -iv $encrypted_b803659a525b_iv
+    -in github_deploy_key.enc -out github_deploy_key -d
+  - chmod 600 github_deploy_key
+  - eval $(ssh-agent)
+  - ssh-add github_deploy_key
+  - git remote set-url origin git@github.com:CUCCS/linux-2019-TheMasterOfMagic.git
+  # 安装shellcheck
+  - export scversion="stable"
+  - wget -q "https://storage.googleapis.com/shellcheck/shellcheck-${scversion}.linux.x86_64.tar.xz"
+  - tar --xz -xvf shellcheck-"${scversion}".linux.x86_64.tar.xz
+  - sudo cp shellcheck-"${scversion}"/shellcheck /usr/bin/
+  - "/usr/bin/shellcheck --version"
+  # 安装依赖项
+  - sudo apt-get update -q
+  - sudo apt install -y imagemagick p7zip-full
+  # 下载数据文件
+  - wget -q http://sec.cuc.edu.cn/huangwei/course/LinuxSysAdmin/exp/chap0x04/worldcupplayerinfo.tsv
+  - wget -q http://sec.cuc.edu.cn/huangwei/course/LinuxSysAdmin/exp/chap0x04/web_log.tsv.7z
+  - 7za x web_log.tsv.7z
 script:
-  - bash test.sh
-
+  - BASE=chap0x04
+  # 任务1测试
+  - DIR1=${BASE}/task1
+  - bash ${DIR1}/imgprcs.sh -h 2>>error.log
+  - bash ${DIR1}/imgprcs.sh -i ${DIR1}/996.svg -f png -q 5 -p quality5_ 2>>error.log
+  - bash ${DIR1}/imgprcs.sh -i ${DIR1}/996.svg -f png -r 500x500 -p resolution500x500_
+    2>>error.log
+  - bash ${DIR1}/imgprcs.sh -i ${DIR1}/996.svg -f png -w 5-red-996 -p watermark-center-red-996_
+    2>>error.log
+  - bash ${DIR1}/imgprcs.sh -i ${DIR1} -f jpg -p batch_ 2>>error.log
+  # 任务2测试
+  - DIR2=${BASE}/task2
+  - tail -n +2 worldcupplayerinfo.tsv > input2.tsv  # 去掉第一行
+  - bash ${DIR2}/wrldcp.sh input2.tsv 2>>error.log
+  # 任务3测试
+  - DIR3=${BASE}/task3
+  - tail -n +2 web_log.tsv > input3.tsv  # 去掉第一行
+  - bash ${DIR3}/wblg.sh input3.tsv 2>>error.log
+  - bash ${DIR3}/wblg.sh input3.tsv /images/NASA-logosmall.gif 2>>error.log
 after_script:
-  - /usr/bin/shellcheck test.sh
-
+  - "/usr/bin/shellcheck ${DIR1}/imgprcs.sh"
+  - "/usr/bin/shellcheck ${DIR2}/wrldcp.sh"
+  - "/usr/bin/shellcheck ${DIR3}/wblg.sh"
+after_success:
+  - git push origin :chap0x04-result &>/dev/null || return 0
+  - git checkout -b chap0x04-result
+  - git add $(git status -s | cut -b 4- | grep .jpg$)
+  - git add $(git status -s | cut -b 4- | grep .png$)
+  - git commit -m "push result images after success"
+  - git push origin chap0x04-result
 after_failure:
   - id
   - pwd
   - df -h
   - cat error.log
-
 notifications:
   email:
     on_success: never
