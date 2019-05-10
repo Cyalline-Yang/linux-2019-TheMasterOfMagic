@@ -28,7 +28,7 @@ Ubuntu 18.04.1 LTS
     unzip master.zip
     cd VeryNginx-master/
     # 修改配置文件nginx.conf的第二行, 设置工作进程的用户为www-data
-    sed -i "s/nginx/www-data/" nginx.conf
+    sed -i "2s/nginx/www-data/" nginx.conf
     # 开始安装
     python3 install.py install
     # 创建软链接方便自己之后使用
