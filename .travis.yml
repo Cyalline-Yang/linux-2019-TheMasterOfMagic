@@ -1,9 +1,8 @@
 sudo: required
-
+dist: xenial
 language: sh
 
 before_install:
-    - sudo apt-get update -q
     - export scversion="stable" # or "v0.4.7", or "latest"
     - wget "https://storage.googleapis.com/shellcheck/shellcheck-${scversion}.linux.x86_64.tar.xz"
     - tar --xz -xvf shellcheck-"${scversion}".linux.x86_64.tar.xz
@@ -11,10 +10,7 @@ before_install:
     - /usr/bin/shellcheck --version
 
 script:
-  - bash test.sh
-
-after_script:
-  - /usr/bin/shellcheck test.sh
+  - shellcheck -e SC1091 $(find ./chap0x06/scripts -type f -name "*.sh")
 
 after_failure:
   - id
