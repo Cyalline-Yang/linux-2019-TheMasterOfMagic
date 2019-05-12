@@ -33,7 +33,7 @@ info "successfully scp-ed script files."
 
 # iteratively install and test each service
 rc=0
-read -ra services < <(echo FTP NFS DHCP DNS Samba)
+read -ra services < <(echo FTP NFS DNS Samba DHCP)
 for service in "${services[@]}"
 do
     install_file="${script_dir}"/"${service}"/install.sh
