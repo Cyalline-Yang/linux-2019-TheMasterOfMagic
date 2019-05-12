@@ -14,6 +14,7 @@ mkdir -p /var/nfs/readonly_dir
 echo > /var/nfs/readonly_dir/readonly_file
 mkdir -p /var/nfs/writable_dir
 echo > /var/nfs/writable_dir/writable_file
+chmod -R 777 /var/nfs/writable_dir
 
 # make sure sharing dierctories and files are exported
 tee /etc/exports > /dev/null << EOF

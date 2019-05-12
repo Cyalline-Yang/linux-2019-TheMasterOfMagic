@@ -22,7 +22,7 @@ umount /var/nfs/* &> /dev/null || [[ $? -eq 32 || $? -eq 64 ]] || exit_because "
 rm -rf /var/nfs/*
 ## mkdir and mount
 mkdir -p /var/nfs/readonly_dir
-mkdir -p /var/nfs/writable_dir && chmod -R 777 /var/nfs/writable_dir
+mkdir -p /var/nfs/writable_dir
 mount -o nfsvers=3 "${server}":/var/nfs/readonly_dir /var/nfs/readonly_dir &> /dev/null || exit_because "failed to mount the readonly directory"
 mount -o nfsvers=3 "${server}":/var/nfs/writable_dir /var/nfs/writable_dir &> /dev/null || exit_because "failed to mount the writable directory"
 
