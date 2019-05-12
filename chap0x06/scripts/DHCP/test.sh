@@ -10,3 +10,6 @@ source ../functions.sh
 [[ "$(whoami)" == root ]] || exit_because "root previledge is required"
 
 warn "not implemented"
+
+# do not influence the original route
+route delete default gw * enp0s8

@@ -19,6 +19,9 @@ cat >> /etc/netplan/01-netcfg.yaml << EOF
 EOF
 netplan apply || exit_because "failed to apply netplan"
 
+# do not influence the original route
+route delete default gw * enp0s8
+
 # modify dhcp config files
 echo INTERFACESv4=\"enp0s8\" > /etc/default/isc-dhcp-server
 cp ./dhcpd.conf /etc/dhcp/dhcpd.conf
