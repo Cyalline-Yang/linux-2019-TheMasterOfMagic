@@ -1,12 +1,39 @@
 # FTP服务器配置任务
-## 任务要求
-- [x] 配置一个提供匿名访问的FTP服务器，匿名访问者可以访问1个目录且仅拥有该目录及其所有子目录的只读访问权限
-- [x] 配置一个支持用户名和密码方式访问的账号，该账号继承匿名访问者所有权限，且拥有对另1个独立目录及其子目录完整读写（包括创建目录、修改文件、删除文件等）权限；
-- [x] 该账号仅可用于FTP服务访问，不能用于系统shell登录；
-- [x] FTP用户不能越权访问指定目录之外的任意其他目录和文件；
-- [x] 匿名访问权限仅限白名单IP来源用户访问，禁止白名单IP以外的访问；
-- [x] （可选加分任务）使用FTPS服务代替FTP服务，上述所有要求在FTPS服务中同时得到满足；
-
 ## 细节
-- 关于FTP, 我洗心革面, 用`proftpd`重做了一遍
-- 6个任务要求全部完成, 且前4个有自动化测试脚本保证其正确性
+- 服务端
+  - 使用的软件包: `proftpd`
+  - 主要配置文件:
+    - `/etc/proftpd/proftpd.conf`: 和大部分做法不一样, 我将需要增添或修改的参数通通以增添的方式添加在了默认的配置文件的尾部. 亲测, 至少对于这个文件来说, 相同名字的参数, 后面的值会覆盖前面的值.
+        ```
+        <Anonymous /var/ftp/anon>
+        User ftp
+        Group ftp
+        UserAlias anonymous ftp
+        RequireValidShell no
+        <Directory *>
+            <Limit WRITE>
+                DenyAll
+            </Limit>
+        </Directory>
+        <Limit LOGIN /home/ftp/*>
+            Order allow,deny
+            Allow from 192.168.0.*
+            Deny from all
+        </Limit>
+        </Anonymous>
+
+        DefaultRoot /var/ftp/norm
+        RequireValidShell no
+
+        <IfModule mod_tls.c>
+            TLSEngine                  on
+            TLSLog                     /var/log/proftpd/tls.log
+            TLSCipherSuite AES128+EECDH:AES128+EDH
+            TLSOptions                 NoCertRequest AllowClientRenegotiations
+            TLSRSACertificateFile      /etc/proftpd/cert.pem
+            TLSRSACertificateKeyFile   /etc/proftpd/key.pem
+            TLSVerifyClient            off
+            TLSRequired                on
+            RequireValidShell          no
+        </IfModule>
+        ```

@@ -1,27 +1,26 @@
 # NFS服务器配置任务
-## 任务要求
-- [x] 在1台Linux上配置NFS服务，另1台电脑上配置NFS客户端挂载2个权限不同的共享目录，分别对应只读访问和读写访问权限
-    - 服务端:
-      - 只读目录: `/var/nfs/readonly_dir`
-      - 可写目录: `/var/nfs/writable_dir`
-      - 树状图:
-        ```
-        root@server:~# tree /var/nfs
-        /var/nfs
-        ├── readonly_dir
-        │   └── readonly_file
-        └── writable_dir
-            ├── new_dir
-            ├── new_file
-            └── writable_file
+## 细节
+- 服务端:
+  - 使用的软件包: `nfs-kernel-server`
+  - 只读目录: `/var/nfs/readonly_dir`
+  - 可写目录: `/var/nfs/writable_dir`
+  - 树状图:
+    ```
+    /var/nfs
+    ├── readonly_dir
+    │   └── readonly_file
+    └── writable_dir
+        ├── new_dir
+        ├── new_file
+        └── writable_file
 
-        3 directories, 3 files
-        root@server:~# 
-        ```
-        其中`new_dir`与`new_file`为测试脚本在客户端运行时所创建, 其他文件或子目录均为安装脚本在服务端运行时所创建
-    - 客户端:
-      - 只读目录挂载点: `/var/nfs/readonly_dir`
-      - 可写目录挂载点: `/var/nfs/writable_dir`
+    3 directories, 3 files
+    ```
+    其中`new_dir`与`new_file`为测试脚本在客户端运行时所创建, 其他文件或子目录均为安装脚本在服务端运行时所创建
+- 客户端:
+  - 使用的软件包: `nfs-common`
+  - 只读目录挂载点: `/var/nfs/readonly_dir`
+  - 可写目录挂载点: `/var/nfs/writable_dir`
 
 ## 客户端信息记录
 ### 共享目录中文件、子目录的属主、权限信息, 与你通过NFS客户端在NFS共享目录中新建的目录、创建的文件的属主、权限信息
