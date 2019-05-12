@@ -70,5 +70,4 @@ systemctl restart proftpd
 
 # test
 ## Part 3 - just ftp, no shell login
-su ftp_user -c echo &> /dev/null
-[[ $? -ne 0 ]] || exit_because "failed to prevent ftp_user from shell login"
+su ftp_user -c echo &> /dev/null && exit_because "failed to prevent ftp_user from shell login"
