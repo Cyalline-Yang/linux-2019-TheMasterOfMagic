@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e 
-
 cd "$(dirname "$0")" || (exit 0)
 source ../functions.sh
 [[ "$(whoami)" == root ]] || exit_because "root previledge is required"
@@ -19,9 +17,6 @@ cat >> /etc/netplan/01-netcfg.yaml << EOF
 EOF
 netplan apply || exit_because "failed to apply netplan"
 
-# do not influence the original route
-route delete default gw * enp0s8
-
 # modify dhcp config files
 echo INTERFACESv4=\"enp0s8\" > /etc/default/isc-dhcp-server
 cp ./dhcpd.conf /etc/dhcp/dhcpd.conf
@@ -38,3 +33,7 @@ EOF
 
 # restart the service to apply the lastest config
 systemctl restart isc-dhcp-server
+
+# do not influence the original route
+sleep 1
+route delete default gw 10.20.50.1 enp0s8

@@ -12,4 +12,5 @@ source ../functions.sh
 warn "not implemented"
 
 # do not influence the original route
-route delete default gw * enp0s8
+dhclient enp0s8 &> /dev/null || (exit 0)
+route delete default gw 10.20.50.1 enp0s8
