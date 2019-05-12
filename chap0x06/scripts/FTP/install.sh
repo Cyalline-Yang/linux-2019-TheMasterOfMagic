@@ -15,7 +15,7 @@ echo ftp_user:ftp_pswd | chpasswd
 
 # make sure the shared folder and files exists
 mkdir -p /var/ftp
-chown -R proftpd /var/ftp
+chown -R proftpd:nogroup /var/ftp
 chmod -R 777 /var/ftp
 ## normal user part
 mkdir -p /var/ftp/norm 2> /dev/null || exit_because "failed to create shared folder for normal user"
@@ -43,7 +43,7 @@ RequireValidShell no
 </Directory>
 <Limit LOGIN /home/ftp/*>
     Order allow,deny
-    Allow from 10.20.50.*
+    Allow from 192.168.0.*
     Deny from all
 </Limit>
 </Anonymous>
@@ -70,4 +70,4 @@ systemctl restart proftpd
 
 # test
 ## Part 3 - just ftp, no shell login
-su ftp_user -c echo &> /dev/null && exit_because "failed to prevent ftp_user from shell login"
+! su ftp_user -c echo &> /dev/null || exit_because "failed to prevent ftp_user from shell login"
